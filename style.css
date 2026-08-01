@@ -1,0 +1,169 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background: #ffffff;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+}
+.topbar {
+  display: flex;
+  gap: 18px;
+  padding: 20px 16px 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.field label {
+  font-size: 13px;
+  color: #666;
+  letter-spacing: 0.02em;
+}
+.field input[type="time"] {
+  font-size: 16px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+}
+.field input[type="time"]:disabled {
+  background: #f2f2f2;
+  color: #999;
+}
+#actionBtn {
+  font-size: 15px;
+  padding: 8px 20px;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+}
+#actionBtn:active { opacity: 0.75; }
+
+.switch { position: relative; display: inline-block; width: 42px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute; inset: 0; cursor: pointer;
+  background: #ccc; border-radius: 24px; transition: 0.2s;
+}
+.switch .slider::before {
+  content: ""; position: absolute; height: 18px; width: 18px;
+  left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s;
+}
+.switch input:checked + .slider { background: #1a1a1a; }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+.switch input:disabled + .slider { opacity: 0.5; cursor: default; }
+
+.period-row {
+  display: none;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 2px 16px 10px;
+}
+.period-btn {
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+.period-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.period-btn:disabled { opacity: 0.5; cursor: default; }
+
+.main {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  align-items: stretch;
+}
+.clock-col {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px 30px;
+  min-width: 0;
+}
+#clock {
+  width: min(70vw, 440px);
+  height: auto;
+  display: block;
+}
+#clock.alarm {
+  animation: pulse 0.7s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.14); }
+}
+
+.sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  border-left: 1px solid #e5e5e5;
+  padding: 26px 18px;
+}
+.sidebar h2 {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.sidebar table { border-collapse: collapse; width: 100%; }
+.sidebar td {
+  font-size: 13px;
+  padding: 5px 0;
+  color: #333;
+  white-space: nowrap;
+}
+.sidebar td.time {
+  color: #888;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+  .main { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e5e5e5;
+    padding: 16px 20px 24px;
+  }
+  .sidebar table { width: auto; margin: 0 auto; }
+}
+
+.tick-minor { stroke: #d5d5d5; stroke-width: 1; }
+.tick-major { stroke: #1a1a1a; stroke-width: 2.5; }
+.num {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1a1a1a;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-family: inherit;
+}
+#hourHand { stroke: #1a1a1a; stroke-width: 6; stroke-linecap: round; }
+#minHand { stroke: #1a1a1a; stroke-width: 4; stroke-linecap: round; }
+#secHand { stroke: #c0392b; stroke-width: 2; stroke-linecap: round; }
+#face { fill: #ffffff; stroke: #1a1a1a; stroke-width: 3; }
+#pin { fill: #1a1a1a; }
