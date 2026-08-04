@@ -104,9 +104,17 @@ periodBtns.forEach(btn => {
 
 function unlockAudio() {
   Object.values(audioEls).forEach(a => {
+    const wasMuted = a.muted;
+    a.muted = true;
     const p = a.play();
     if (p && p.then) {
-      p.then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+      p.then(() => {
+        a.pause();
+        a.currentTime = 0;
+        a.muted = wasMuted;
+      }).catch(() => { a.muted = wasMuted; });
+    } else {
+      a.muted = wasMuted;
     }
   });
 }
@@ -229,7 +237,7 @@ function startClock() {
   soundToggle.disabled = true;
   periodBtns.forEach(b => b.disabled = true);
   actionBtn.textContent = '초기화';
-  unlockAudio();
+  if (soundOn) unlockAudio();
   requestWakeLock();
 }
 
