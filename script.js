@@ -290,3 +290,18 @@ function tick() {
 
 renderStatic();
 setInterval(tick, 250);
+
+// ==== TEMP DEV PANEL — remove before shipping ====
+const devTimeInput = document.getElementById('devTimeInput');
+const devApplyBtn = document.getElementById('devApplyBtn');
+
+devApplyBtn.addEventListener('click', () => {
+  if (!devTimeInput.value) return;
+  if (running) resetClock();
+  const parts = devTimeInput.value.split(':').map(Number);
+  const h = parts[0] || 0;
+  const m = parts[1] || 0;
+  const s = parts[2] || 0;
+  setHands(h, m, s);
+});
+// ==== END TEMP DEV PANEL ====
