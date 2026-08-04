@@ -9,11 +9,11 @@
 <body>
 
   <div class="topbar">
-    <div class="field">
+    <div class="field hide-on-run">
       <label for="startInput">시작 시각</label>
       <input type="time" id="startInput">
     </div>
-    <div class="field">
+    <div class="field hide-on-run">
       <label for="endInput">종료 시각</label>
       <input type="time" id="endInput">
     </div>
@@ -21,16 +21,20 @@
       <label>&nbsp;</label>
       <button id="actionBtn">시작</button>
     </div>
-    <div class="field">
+    <div class="field hide-on-run">
       <label for="soundToggle">소리</label>
       <label class="switch">
         <input type="checkbox" id="soundToggle">
         <span class="slider"></span>
       </label>
     </div>
+    <div class="field hide-on-run">
+      <label>&nbsp;</label>
+      <button id="testSoundBtn">소리 테스트</button>
+    </div>
   </div>
 
-  <div class="period-row" id="periodRow">
+  <div class="period-row hide-on-run" id="periodRow">
     <button class="period-btn" data-period="p1">1교시(국어)</button>
     <button class="period-btn" data-period="p2">2교시(수학)</button>
     <button class="period-btn" data-period="p3">3교시(영어)</button>
