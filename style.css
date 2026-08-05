@@ -70,7 +70,7 @@ body {
 .switch input:disabled + .slider { opacity: 0.5; cursor: default; }
 
 .period-row {
-  display: none;
+  display: flex;
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
@@ -87,6 +87,23 @@ body {
 }
 .period-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
 .period-btn:disabled { opacity: 0.5; cursor: default; }
+
+#testSoundBtn {
+  font-size: 13px;
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+#testSoundBtn:active { opacity: 0.75; }
+
+/* while the clock is running, hide everything not needed and enlarge the clock */
+body.running .hide-on-run { display: none !important; }
+body.running #clock {
+  width: min(85vmin, 640px);
+}
 
 .main {
   display: flex;

@@ -44,7 +44,7 @@ const startInput = document.getElementById('startInput');
 const endInput = document.getElementById('endInput');
 const actionBtn = document.getElementById('actionBtn');
 const soundToggle = document.getElementById('soundToggle');
-const periodRow = document.getElementById('periodRow');
+const testSoundBtn = document.getElementById('testSoundBtn');
 const periodBtns = Array.from(document.querySelectorAll('.period-btn'));
 const numTexts = numsG.querySelectorAll('text');
 
@@ -86,12 +86,25 @@ const PERIOD_CONFIG = {
   p4e2: { warnThreshold: 10, warnOffset: 5,  warnAudio: audioEls.p4e2_warn, endAudio: audioEls.p4e2_end }
 };
 
+// 수능 시간표 (사이드바 표와 동일)
+const PERIOD_TIMES = {
+  p1:   { start: '08:40', end: '10:00' },
+  p2:   { start: '10:30', end: '12:10' },
+  p3:   { start: '13:10', end: '14:20' },
+  p4h:  { start: '14:50', end: '15:20' },
+  p4e1: { start: '15:35', end: '16:05' },
+  p4e2: { start: '16:07', end: '16:37' }
+};
+
 let soundOn = false;
 let selectedPeriod = null;
 
 soundToggle.addEventListener('change', () => {
   soundOn = soundToggle.checked;
-  periodRow.style.display = soundOn ? 'flex' : 'none';
+});
+
+testSoundBtn.addEventListener('click', () => {
+  playSound(audioEls.p1_warn);
 });
 
 periodBtns.forEach(btn => {
@@ -99,6 +112,15 @@ periodBtns.forEach(btn => {
     periodBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedPeriod = btn.dataset.period;
+
+    // 소리가 켜져 있든 꺼져 있든, 교시 버튼을 누르면 시험 시각표에 맞춰
+    // 시작/종료 시각을 바꿔준다. 이후에도 직접 수정 가능하다.
+    const times = PERIOD_TIMES[selectedPeriod];
+    if (times && !running) {
+      startInput.value = times.start;
+      endInput.value = times.end;
+      renderStatic();
+    }
   });
 });
 
@@ -235,8 +257,10 @@ function startClock() {
   startInput.disabled = true;
   endInput.disabled = true;
   soundToggle.disabled = true;
+  testSoundBtn.disabled = true;
   periodBtns.forEach(b => b.disabled = true);
   actionBtn.textContent = '초기화';
+  document.body.classList.add('running');
   if (soundOn) unlockAudio();
   requestWakeLock();
 }
@@ -247,8 +271,10 @@ function resetClock() {
   startInput.disabled = false;
   endInput.disabled = false;
   soundToggle.disabled = false;
+  testSoundBtn.disabled = false;
   periodBtns.forEach(b => b.disabled = false);
   actionBtn.textContent = '시작';
+  document.body.classList.remove('running');
   renderStatic();
   releaseWakeLock();
 }
