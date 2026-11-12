@@ -190,3 +190,16 @@ body.running #clock {
 #secHand { stroke: #c0392b; stroke-width: 2; stroke-linecap: round; }
 #face { fill: #ffffff; stroke: #1a1a1a; stroke-width: 3; }
 #pin { fill: #1a1a1a; }
+
+.listening-row {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  align-items: center; padding: 0 16px 10px; font-size: 13px; color: #666;
+}
+.listening-row[hidden] { display: none; }
+.listening-title { font-weight: 600; color: #333; }
+.file-btn, #listeningTestBtn {
+  font-size: 13px; padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px;
+  background: #fff; color: #333; cursor: pointer;
+}
+.listening-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #888; }
+.listening-row input[type="time"] { font-size: 14px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 6px; }

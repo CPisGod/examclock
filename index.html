@@ -43,6 +43,16 @@
     <button class="period-btn" data-period="p4e2">4교시(탐구2)</button>
   </div>
 
+  <div class="listening-row hide-on-run" id="listeningRow" hidden>
+    <span class="listening-title">영어 듣기</span>
+    <label class="file-btn" for="listeningFile">mp3 선택</label>
+    <input type="file" id="listeningFile" accept="audio/*,.mp3" hidden>
+    <span id="listeningName" class="listening-name">선택된 파일 없음</span>
+    <label for="listeningTime">재생 시각</label>
+    <input type="time" id="listeningTime" value="13:07">
+    <button id="listeningTestBtn" type="button">재생/정지</button>
+  </div>
+
   <div class="main">
     <div class="clock-col">
       <svg id="clock" viewBox="0 0 200 200" width="200" height="200">

@@ -96,6 +96,41 @@ const PERIOD_TIMES = {
   p4e2: { start: '16:07', end: '16:37' }
 };
 
+// ---- 영어 듣기 mp3 (기기에서 고른 파일을 지정 시각에 재생) ----
+const listeningRow = document.getElementById('listeningRow');
+const listeningFile = document.getElementById('listeningFile');
+const listeningName = document.getElementById('listeningName');
+const listeningTime = document.getElementById('listeningTime');
+const listeningTestBtn = document.getElementById('listeningTestBtn');
+const listeningAudio = new Audio();
+listeningAudio.preload = 'auto';
+let listeningUrl = null;
+let listeningPlayed = false;
+
+listeningFile.addEventListener('change', () => {
+  const f = listeningFile.files && listeningFile.files[0];
+  if (!f) return;
+  if (listeningUrl) URL.revokeObjectURL(listeningUrl);
+  listeningUrl = URL.createObjectURL(f);
+  listeningAudio.src = listeningUrl;
+  listeningName.textContent = f.name;
+});
+
+listeningTestBtn.addEventListener('click', () => {
+  if (!listeningUrl) return;
+  if (listeningAudio.paused) {
+    listeningAudio.currentTime = 0;
+    listeningAudio.play().catch(() => {});
+  } else {
+    listeningAudio.pause();
+  }
+});
+
+function stopListening() {
+  listeningAudio.pause();
+  try { listeningAudio.currentTime = 0; } catch (e) {}
+}
+
 let soundOn = false;
 let selectedPeriod = null;
 
@@ -112,6 +147,7 @@ periodBtns.forEach(btn => {
     periodBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedPeriod = btn.dataset.period;
+    listeningRow.hidden = selectedPeriod !== 'p3';
 
     // 소리가 켜져 있든 꺼져 있든, 교시 버튼을 누르면 시험 시각표에 맞춰
     // 시작/종료 시각을 바꿔준다. 이후에도 직접 수정 가능하다.
@@ -254,6 +290,8 @@ function startClock() {
   realStartTimestamp = Date.now();
   running = true;
   warnPlayed = false;
+  // 시작 시점에 이미 듣기 시각이 지났으면 재생하지 않음
+  listeningPlayed = !!listeningTime.value && parseTimeToday(listeningTime.value) <= virtualStartMs;
   startInput.disabled = true;
   endInput.disabled = true;
   soundToggle.disabled = true;
@@ -262,11 +300,20 @@ function startClock() {
   actionBtn.textContent = '초기화';
   document.body.classList.add('running');
   if (soundOn) unlockAudio();
+  if (selectedPeriod === 'p3' && listeningUrl) {
+    // 사용자 클릭 시점에 오디오를 한 번 풀어둬야 나중에 자동 재생이 막히지 않음
+    listeningAudio.muted = true;
+    const p = listeningAudio.play();
+    const restore = () => { listeningAudio.pause(); listeningAudio.currentTime = 0; listeningAudio.muted = false; };
+    if (p && p.then) p.then(restore).catch(() => { listeningAudio.muted = false; });
+    else restore();
+  }
   requestWakeLock();
 }
 
 function resetClock() {
   running = false;
+  stopListening();
   exitAlarm();
   startInput.disabled = false;
   endInput.disabled = false;
@@ -304,6 +351,13 @@ function tick() {
         warnPlayed = true;
       }
     }
+  }
+
+  if (selectedPeriod === 'p3' && listeningUrl && !listeningPlayed && listeningTime.value
+      && virtualMs >= parseTimeToday(listeningTime.value)) {
+    listeningPlayed = true;
+    listeningAudio.currentTime = 0;
+    listeningAudio.play().catch(() => {});
   }
 
   if (virtualMs >= virtualEndMs) {
