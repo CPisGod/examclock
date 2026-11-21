@@ -53,6 +53,16 @@ body {
   color: #fff;
   cursor: pointer;
 }
+#pauseBtn {
+  font-size: 15px;
+  padding: 8px 20px;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+#pauseBtn.paused { background: #c0392b; border-color: #c0392b; color: #fff; }
 #actionBtn:active { opacity: 0.75; }
 
 .switch { position: relative; display: inline-block; width: 42px; height: 24px; }

@@ -341,6 +341,24 @@ let virtualStartMs = 0;
 let virtualEndMs = 0;
 let realStartTimestamp = 0;
 let warnPlayed = false;
+let paused = false;
+let pausedAt = 0;
+const pauseBtn = document.getElementById('pauseBtn');
+const pauseField = document.getElementById('pauseField');
+
+function setPaused(p) {
+  if (p === paused) return;
+  if (p) {
+    pausedAt = Date.now();
+  } else {
+    // shift the real-time anchor so the virtual clock resumes where it stopped
+    realStartTimestamp += Date.now() - pausedAt;
+  }
+  paused = p;
+  pauseBtn.textContent = p ? '계속' : '일시정지';
+  pauseBtn.classList.toggle('paused', p);
+}
+pauseBtn.addEventListener('click', () => setPaused(!paused));
 
 function startClock() {
   if (!startInput.value || !endInput.value) return;
@@ -351,6 +369,10 @@ function startClock() {
   realStartTimestamp = Date.now();
   running = true;
   warnPlayed = false;
+  paused = false;
+  pauseBtn.textContent = '일시정지';
+  pauseBtn.classList.remove('paused');
+  pauseField.style.display = '';
   startInput.disabled = true;
   endInput.disabled = true;
   soundToggle.disabled = true;
@@ -364,6 +386,8 @@ function startClock() {
 
 function resetClock() {
   running = false;
+  paused = false;
+  pauseField.style.display = 'none';
   exitAlarm();
   startInput.disabled = false;
   endInput.disabled = false;
@@ -386,7 +410,7 @@ startInput.addEventListener('input', () => {
 });
 
 function tick() {
-  if (!running) return;
+  if (!running || paused) return;
   const virtualMs = virtualStartMs + (Date.now() - realStartTimestamp);
   const vd = new Date(virtualMs);
   setHands(vd.getHours(), vd.getMinutes(), vd.getSeconds());
