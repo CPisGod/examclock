@@ -21,6 +21,13 @@
       <label>&nbsp;</label>
       <button id="actionBtn">시작</button>
     </div>
+    <div class="field">
+      <label>표시 방식</label>
+      <div class="mode-group" id="modeGroup">
+        <button class="mode-btn active" data-mode="analog">아날로그</button>
+        <button class="mode-btn" data-mode="digital">디지털</button>
+      </div>
+    </div>
     <div class="field hide-on-run">
       <label for="soundToggle">소리</label>
       <label class="switch">
@@ -54,6 +61,7 @@
         <line id="secHand" x1="100" y1="112" x2="100" y2="22"/>
         <circle id="pin" cx="100" cy="100" r="4.5"/>
       </svg>
+      <svg id="digital" style="display:none" aria-label="디지털 시계"></svg>
     </div>
     <div class="sidebar">
       <h2>수능 시간표</h2>

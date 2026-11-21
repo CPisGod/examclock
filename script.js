@@ -186,6 +186,7 @@ function enterAlarm() {
   if (alarmOn) return;
   alarmOn = true;
   clockEl.classList.add('alarm');
+  digitalEl.classList.add('alarm');
   colorTimer = setInterval(() => {
     hue = (hue + 12) % 360;
     faceEl.style.fill = `hsl(${hue}, 92%, 88%)`;
@@ -197,6 +198,8 @@ function enterAlarm() {
     numTexts.forEach((t, idx) => {
       t.style.fill = `hsl(${(hue + idx * 20) % 360}, 100%, 42%)`;
     });
+    digitalEl.style.setProperty('--seg-on', `hsl(${hue}, 100%, 45%)`);
+    digitalEl.style.filter = `drop-shadow(0 0 12px hsl(${hue},100%,55%)) drop-shadow(0 0 28px hsl(${(hue + 180) % 360},100%,55%))`;
     clockEl.style.filter =
       `drop-shadow(0 0 18px hsl(${hue},100%,55%)) drop-shadow(0 0 38px hsl(${(hue + 180) % 360},100%,55%))`;
   }, 80);
@@ -206,6 +209,9 @@ function exitAlarm() {
   if (!alarmOn) return;
   alarmOn = false;
   clockEl.classList.remove('alarm');
+  digitalEl.classList.remove('alarm');
+  digitalEl.style.removeProperty('--seg-on');
+  digitalEl.style.filter = '';
   clearInterval(colorTimer);
   faceEl.style.fill = '';
   faceEl.style.stroke = '';
@@ -217,7 +223,98 @@ function exitAlarm() {
   clockEl.style.filter = '';
 }
 
+// ---- seven-segment digital display ----
+const digitalEl = document.getElementById('digital');
+const SEG_MAP = { // a b c d e f g
+  0: 'abcdef', 1: 'bc', 2: 'abdeg', 3: 'abcdg', 4: 'bcfg',
+  5: 'acdfg', 6: 'acdefg', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg'
+};
+const DW = 34, DH = 60, DT = 7, DG = 1.5;
+const digitSegs = []; // per digit: {a: polygon, ...}
+
+function hexH(cx0, cy0, len) {
+  const x0 = cx0 - len / 2, x1 = cx0 + len / 2, h = DT / 2;
+  return `${x0},${cy0} ${x0 + h},${cy0 - h} ${x1 - h},${cy0 - h} ${x1},${cy0} ${x1 - h},${cy0 + h} ${x0 + h},${cy0 + h}`;
+}
+function hexV(cx0, cy0, len) {
+  const y0 = cy0 - len / 2, y1 = cy0 + len / 2, h = DT / 2;
+  return `${cx0},${y0} ${cx0 + h},${y0 + h} ${cx0 + h},${y1 - h} ${cx0},${y1} ${cx0 - h},${y1 - h} ${cx0 - h},${y0 + h}`;
+}
+
+(function buildDigital() {
+  const PAD = 6, GAP = 8, COLON = 16;
+  const xs = [];
+  let x = PAD;
+  for (let i = 0; i < 6; i++) {
+    xs.push(x);
+    x += DW + (i % 2 === 0 ? GAP : (i === 5 ? 0 : COLON + GAP));
+  }
+  const totalW = x + PAD, totalH = DH + PAD * 2;
+  digitalEl.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  const lenH = DW - DT - DG * 2, lenV = (DH - DT) / 2 - DG * 2 + DT * 0.5;
+  const mid = DH / 2, h2 = DT / 2;
+  xs.forEach(dx => {
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('transform', `translate(${dx} ${PAD})`);
+    const defs = {
+      a: hexH(DW / 2, h2, lenH),
+      g: hexH(DW / 2, mid, lenH),
+      d: hexH(DW / 2, DH - h2, lenH),
+      f: hexV(h2, (h2 + mid) / 2, lenV),
+      b: hexV(DW - h2, (h2 + mid) / 2, lenV),
+      e: hexV(h2, (mid + DH - h2) / 2, lenV),
+      c: hexV(DW - h2, (mid + DH - h2) / 2, lenV)
+    };
+    const segs = {};
+    Object.keys(defs).forEach(k => {
+      const p = document.createElementNS(svgNS, 'polygon');
+      p.setAttribute('points', defs[k]);
+      p.setAttribute('class', 'seg');
+      g.appendChild(p);
+      segs[k] = p;
+    });
+    digitSegs.push(segs);
+    digitalEl.appendChild(g);
+  });
+  // colons between HH|MM and MM|SS
+  [2, 4].forEach(i => {
+    const colX = xs[i - 1] + DW + (GAP + COLON) / 2;
+    [DH * 0.32, DH * 0.68].forEach(yy => {
+      const c = document.createElementNS(svgNS, 'circle');
+      c.setAttribute('cx', colX);
+      c.setAttribute('cy', yy + PAD);
+      c.setAttribute('r', 3.2);
+      c.setAttribute('class', 'colon');
+      digitalEl.appendChild(c);
+    });
+  });
+})();
+
+function setDigital(h, m, s) {
+  const digits = [h / 10 | 0, h % 10, m / 10 | 0, m % 10, s / 10 | 0, s % 10];
+  digits.forEach((d, i) => {
+    const on = SEG_MAP[d];
+    Object.keys(digitSegs[i]).forEach(k => {
+      digitSegs[i][k].classList.toggle('on', on.includes(k));
+    });
+  });
+}
+
+// ---- display mode (analog / digital) ----
+const modeBtns = Array.from(document.querySelectorAll('.mode-btn'));
+function setMode(mode) {
+  const digital = mode === 'digital';
+  clockEl.style.display = digital ? 'none' : '';
+  digitalEl.style.display = digital ? '' : 'none';
+  modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  try { localStorage.setItem('clockMode', mode); } catch (e) {}
+}
+modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+let savedMode = 'analog';
+try { savedMode = localStorage.getItem('clockMode') || 'analog'; } catch (e) {}
+
 function setHands(h, m, s) {
+  setDigital(h, m, s);
   const secAngle = s * 6;
   const minAngle = m * 6 + s * 0.1;
   const hourAngle = (h % 12) * 30 + m * 0.5;
@@ -314,5 +411,6 @@ function tick() {
   }
 }
 
+setMode(savedMode);
 renderStatic();
 setInterval(tick, 250);
