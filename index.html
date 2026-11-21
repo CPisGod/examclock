@@ -10,10 +10,25 @@
 
   <div class="topbar">
     <div class="field hide-on-run">
+      <label>종류</label>
+      <div class="mode-group" id="kindGroup">
+        <button class="mode-btn active" data-kind="clock">시계</button>
+        <button class="mode-btn" data-kind="timer">타이머</button>
+      </div>
+    </div>
+    <div class="field hide-on-run timer-only">
+      <label>타이머 시간</label>
+      <div class="dur-group" id="timerInput">
+        <input type="number" id="tH" min="0" max="23" value="0" aria-label="시"><span>시</span>
+        <input type="number" id="tM" min="0" max="59" value="10" aria-label="분"><span>분</span>
+        <input type="number" id="tS" min="0" max="59" value="0" aria-label="초"><span>초</span>
+      </div>
+    </div>
+    <div class="field hide-on-run clock-only">
       <label for="startInput">시작 시각</label>
       <input type="time" id="startInput" step="1">
     </div>
-    <div class="field hide-on-run">
+    <div class="field hide-on-run clock-only">
       <label for="endInput">종료 시각</label>
       <input type="time" id="endInput" step="1">
     </div>
@@ -45,7 +60,7 @@
     </div>
   </div>
 
-  <div class="period-row hide-on-run" id="periodRow">
+  <div class="period-row hide-on-run clock-only" id="periodRow">
     <button class="period-btn" data-period="p1">1교시(국어)</button>
     <button class="period-btn" data-period="p2">2교시(수학)</button>
     <button class="period-btn" data-period="p3">3교시(영어)</button>

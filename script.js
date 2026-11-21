@@ -301,7 +301,7 @@ function setDigital(h, m, s) {
 }
 
 // ---- display mode (analog / digital) ----
-const modeBtns = Array.from(document.querySelectorAll('.mode-btn'));
+const modeBtns = Array.from(document.querySelectorAll('.mode-btn[data-mode]'));
 function setMode(mode) {
   const digital = mode === 'digital';
   clockEl.style.display = digital ? 'none' : '';
@@ -324,6 +324,7 @@ function setHands(h, m, s) {
 }
 
 function renderStatic() {
+  if (timerKind) { setFromMs(parseDur()); return; }
   if (!startInput.value) { setHands(0, 0, 0); return; }
   const [h, m, sec] = startInput.value.split(':').map(Number);
   setHands(h, m, sec || 0);
@@ -342,6 +343,26 @@ let virtualEndMs = 0;
 let realStartTimestamp = 0;
 let warnPlayed = false;
 let paused = false;
+let timerKind = false;
+let timerDurMs = 0;
+const kindBtns = Array.from(document.querySelectorAll('[data-kind]'));
+const timerNums = ['tH', 'tM', 'tS'].map(id => document.getElementById(id));
+function parseDur() {
+  const [h, m, sec] = timerNums.map(el => Math.max(0, parseInt(el.value, 10) || 0));
+  return Math.min(h * 3600 + m * 60 + sec, 86399) * 1000;
+}
+function setKind(kind) {
+  timerKind = kind === 'timer';
+  document.body.classList.toggle('timer-kind', timerKind);
+  kindBtns.forEach(b => b.classList.toggle('active', b.dataset.kind === kind));
+  renderStatic();
+}
+kindBtns.forEach(b => b.addEventListener('click', () => { if (!running) setKind(b.dataset.kind); }));
+timerNums.forEach(el => el.addEventListener('input', () => { if (!running) renderStatic(); }));
+function setFromMs(ms) {
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  setHands(Math.floor(t / 3600) % 24, Math.floor(t / 60) % 60, t % 60);
+}
 let pausedAt = 0;
 const pauseBtn = document.getElementById('pauseBtn');
 const pauseField = document.getElementById('pauseField');
@@ -361,6 +382,25 @@ function setPaused(p) {
 pauseBtn.addEventListener('click', () => setPaused(!paused));
 
 function startClock() {
+  if (timerKind) {
+    timerDurMs = parseDur();
+    if (timerDurMs <= 0) return;
+    virtualStartMs = 0;
+    virtualEndMs = timerDurMs;
+    realStartTimestamp = Date.now();
+    running = true; paused = false;
+    pauseBtn.textContent = '일시정지';
+    pauseBtn.classList.remove('paused');
+    pauseField.style.display = '';
+    timerNums.forEach(el => el.disabled = true);
+    kindBtns.forEach(b => b.disabled = true);
+    soundToggle.disabled = true;
+    testSoundBtn.disabled = true;
+    actionBtn.textContent = '초기화';
+    document.body.classList.add('running');
+    requestWakeLock();
+    return;
+  }
   if (!startInput.value || !endInput.value) return;
   virtualStartMs = parseTimeToday(startInput.value);
   let endMs = parseTimeToday(endInput.value);
@@ -388,6 +428,8 @@ function resetClock() {
   running = false;
   paused = false;
   pauseField.style.display = 'none';
+  timerNums.forEach(el => el.disabled = false);
+  kindBtns.forEach(b => b.disabled = false);
   exitAlarm();
   startInput.disabled = false;
   endInput.disabled = false;
@@ -411,6 +453,12 @@ startInput.addEventListener('input', () => {
 
 function tick() {
   if (!running || paused) return;
+  if (timerKind) {
+    const remain = timerDurMs - (Date.now() - realStartTimestamp);
+    setFromMs(remain);
+    if (remain <= 0) enterAlarm();
+    return;
+  }
   const virtualMs = virtualStartMs + (Date.now() - realStartTimestamp);
   const vd = new Date(virtualMs);
   setHands(vd.getHours(), vd.getMinutes(), vd.getSeconds());

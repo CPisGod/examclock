@@ -32,6 +32,9 @@ body {
   color: #666;
   letter-spacing: 0.02em;
 }
+.timer-only { display: none; }
+body.timer-kind .timer-only { display: flex; }
+body.timer-kind .clock-only { display: none !important; }
 .field input[type="time"] {
   font-size: 16px;
   padding: 6px 10px;
@@ -225,3 +228,11 @@ body.running #digital { width: min(94vw, 1000px); }
 #secHand { stroke: #c0392b; stroke-width: 2; stroke-linecap: round; }
 #face { fill: #ffffff; stroke: #1a1a1a; stroke-width: 3; }
 #pin { fill: #1a1a1a; }
+
+.dur-group { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; }
+.dur-group input {
+  width: 52px; font-size: 16px; padding: 6px 6px; text-align: right;
+  border: 1px solid #ccc; border-radius: 6px; color: #111;
+}
+.dur-group input:disabled { background: #f2f2f2; color: #999; }
+.dur-group span { margin-right: 6px; }
