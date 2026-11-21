@@ -51,9 +51,9 @@ const numTexts = numsG.querySelectorAll('text');
 function pad(n) { return String(n).padStart(2, '0'); }
 
 const nowDefault = new Date();
-startInput.value = `${pad(nowDefault.getHours())}:${pad(nowDefault.getMinutes())}`;
+startInput.value = `${pad(nowDefault.getHours())}:${pad(nowDefault.getMinutes())}:00`;
 const endDefault = new Date(nowDefault.getTime() + 60 * 60 * 1000);
-endInput.value = `${pad(endDefault.getHours())}:${pad(endDefault.getMinutes())}`;
+endInput.value = `${pad(endDefault.getHours())}:${pad(endDefault.getMinutes())}:00`;
 
 // ---- audio (separate mp3 files under audio/) ----
 const AUDIO_DATA = {
@@ -325,14 +325,14 @@ function setHands(h, m, s) {
 
 function renderStatic() {
   if (!startInput.value) { setHands(0, 0, 0); return; }
-  const [h, m] = startInput.value.split(':').map(Number);
-  setHands(h, m, 0);
+  const [h, m, sec] = startInput.value.split(':').map(Number);
+  setHands(h, m, sec || 0);
 }
 
 function parseTimeToday(value) {
-  const [h, m] = value.split(':').map(Number);
+  const [h, m, sec] = value.split(':').map(Number);
   const d = new Date();
-  d.setHours(h, m, 0, 0);
+  d.setHours(h, m, sec || 0, 0);
   return d.getTime();
 }
 
